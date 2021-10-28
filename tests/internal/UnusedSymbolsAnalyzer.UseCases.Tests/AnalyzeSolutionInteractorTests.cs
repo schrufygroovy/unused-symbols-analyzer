@@ -86,7 +86,8 @@ namespace Dependency
             var solution = await WorkspaceCreator.CreateOneFileSolutionAsync(
                 source,
                 ReferenceAssemblies.Default
-                    .AddPackages(ImmutableArray.Create(new PackageIdentity("nunit", "3.13.1"))),
+                    .AddPackages(ImmutableArray.Create(
+                        new PackageIdentity("nunit", "3.13.1"))),
                 this.CancellationToken);
             var result = await analyzeSolutionInteractor.AnalyzeSolution(new AnalyzeSolutionArguments { Solution = solution }, this.CancellationToken);
             Assert.That(result.UnusedTypes, Is.Null.Or.Empty);

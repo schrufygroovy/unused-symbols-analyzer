@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.Testing;
 using Microsoft.CodeAnalysis.Testing.Verifiers;
 
 namespace UnusedSymbolsAnalyzer.UseCases.Tests
@@ -11,7 +12,7 @@ namespace UnusedSymbolsAnalyzer.UseCases.Tests
         public static Task<Solution> CreateDependingSourcesSolutionAsync(
             string source,
             string dependencySource,
-            CancellationToken cancellationToken = default(CancellationToken))
+            CancellationToken cancellationToken)
         {
             var test = new SolutionAnalyzerTest<NUnitVerifier>
             {
@@ -32,6 +33,28 @@ namespace UnusedSymbolsAnalyzer.UseCases.Tests
                             .AddProjectReference(new ProjectReference(sideProject.Id))
                             .Solution;
                     }
+                }
+            };
+
+            return test.CreateSolutionAsync(cancellationToken);
+        }
+
+        public static Task<Solution> CreateOneFileSolutionAsync(
+            string source,
+            CancellationToken cancellationToken)
+            => CreateOneFileSolutionAsync(source, ReferenceAssemblies.Default, cancellationToken);
+
+        public static Task<Solution> CreateOneFileSolutionAsync(
+            string source,
+            ReferenceAssemblies referenceAssemblies,
+            CancellationToken cancellationToken)
+        {
+            var test = new SolutionAnalyzerTest<NUnitVerifier>
+            {
+                ReferenceAssemblies = referenceAssemblies,
+                TestState =
+                {
+                    Sources = { source },
                 }
             };
 

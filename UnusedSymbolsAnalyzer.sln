@@ -1,0 +1,42 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.31702.278
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{03495D56-8E9E-4A88-A1A3-D8CF31B4E6B6}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnusedSymbolsAnalyzer.UseCases", "src\UnusedSymbolsAnalyzer.UseCases\UnusedSymbolsAnalyzer.UseCases.csproj", "{AA8FA129-719B-446E-9326-BE565FDD1BA4}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{8428F468-BCCB-4FC8-8EF9-2F6C3AE895C5}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "internal", "internal", "{68F18C78-550E-41CA-9DCC-C581DCD6D75E}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UnusedSymbolsAnalyzer.UseCases.Tests", "tests\internal\UnusedSymbolsAnalyzer.UseCases.Tests\UnusedSymbolsAnalyzer.UseCases.Tests.csproj", "{D1988886-EA94-4BDD-97AB-37B6D53286E9}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{AA8FA129-719B-446E-9326-BE565FDD1BA4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AA8FA129-719B-446E-9326-BE565FDD1BA4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AA8FA129-719B-446E-9326-BE565FDD1BA4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AA8FA129-719B-446E-9326-BE565FDD1BA4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D1988886-EA94-4BDD-97AB-37B6D53286E9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D1988886-EA94-4BDD-97AB-37B6D53286E9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D1988886-EA94-4BDD-97AB-37B6D53286E9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D1988886-EA94-4BDD-97AB-37B6D53286E9}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{AA8FA129-719B-446E-9326-BE565FDD1BA4} = {03495D56-8E9E-4A88-A1A3-D8CF31B4E6B6}
+		{68F18C78-550E-41CA-9DCC-C581DCD6D75E} = {8428F468-BCCB-4FC8-8EF9-2F6C3AE895C5}
+		{D1988886-EA94-4BDD-97AB-37B6D53286E9} = {68F18C78-550E-41CA-9DCC-C581DCD6D75E}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {CF6ECAB4-C769-48CE-A0AA-EFF85062AE9B}
+	EndGlobalSection
+EndGlobal

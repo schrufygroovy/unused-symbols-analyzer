@@ -1,0 +1,33 @@
+[*.*]
+indent_style = space:error
+
+[*.cs]
+indent_size = 4:error
+end_of_line = crlf:error
+
+# Use 'var' instead of explicit type (IDE0007)
+csharp_style_var_for_built_in_types = true:error
+csharp_style_var_when_type_is_apparent = true:error
+csharp_style_var_elsewhere = true:error
+dotnet_diagnostic.IDE0007.severity = error
+
+# this. qualification (IDE0003 / IDE0009)
+dotnet_style_qualification_for_field = true
+dotnet_style_qualification_for_property = true
+dotnet_style_qualification_for_method = true
+dotnet_style_qualification_for_event = true
+dotnet_diagnostic.IDE0003.severity = none
+dotnet_diagnostic.IDE0009.severity = error
+
+# Add missing cases to switch statement (IDE0010)
+dotnet_diagnostic.IDE0010.severity = error
+# Fix formating (IDE0055)
+dotnet_diagnostic.IDE0055.severity = error
+# Use pattern matching (IDE0078)
+dotnet_diagnostic.IDE0078.severity = error
+
+# Remove unnecessary import (IDE0005) - does not work during build because of bug: https://github.com/dotnet/roslyn/issues/41640
+dotnet_diagnostic.IDE0005.severity = error
+
+# dotnet_analyzer_diagnostic.category-Style.severity = error
+# dotnet_analyzer_diagnostic.category-CodeQuality.severity = error

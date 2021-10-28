@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System.Threading;
+using System.Threading.Tasks;
 using NUnit.Framework;
 using UnusedSymbolsAnalyzer.UseCases.Interactors.AnalyzeSolution;
 
@@ -7,13 +8,16 @@ namespace UnusedSymbolsAnalyzer.UseCases.Tests
     [TestFixture]
     public class AnalyzeSolutionInteractorTests
     {
+        private readonly CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
+
+        private CancellationToken CancellationToken => this.cancellationTokenSource.Token;
+
         [Test]
         public void AnalyzeSolution_SolutionNull_Throws_ArgumentException()
         {
             var analyzeSolutionInteractor = new AnalyzeSolutionInteractor();
-
             Assert.That(
-                () => analyzeSolutionInteractor.AnalyzeSolution(new AnalyzeSolutionArguments()),
+                () => analyzeSolutionInteractor.AnalyzeSolution(new AnalyzeSolutionArguments(), this.CancellationToken),
                 Throws.ArgumentException);
         }
 
@@ -42,7 +46,7 @@ namespace Hui
 }";
             var solution = await WorkspaceCreator.CreateDependingSourcesSolutionAsync(source, dependencySource);
             Assert.That(
-                () => analyzeSolutionInteractor.AnalyzeSolution(new AnalyzeSolutionArguments { Solution = solution }),
+                () => analyzeSolutionInteractor.AnalyzeSolution(new AnalyzeSolutionArguments { Solution = solution }, this.CancellationToken),
                 Throws.Nothing);
         }
     }

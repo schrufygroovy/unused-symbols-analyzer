@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -23,9 +22,6 @@ namespace UnusedSymbolsAnalyzer.UseCases.Interactors.AnalyzeSolution
             "NUnit.Framework.TestFixtureAttribute"
         };
 
-        private static readonly SymbolDisplayFormat FullyQualifiedNameFormat = new SymbolDisplayFormat(
-            typeQualificationStyle: SymbolDisplayTypeQualificationStyle.NameAndContainingTypesAndNamespaces);
-
         public Task<AnalyzeSolutionResult> AnalyzeSolution(
             AnalyzeSolutionArguments arguments,
             CancellationToken cancellationToken)
@@ -37,9 +33,11 @@ namespace UnusedSymbolsAnalyzer.UseCases.Interactors.AnalyzeSolution
 
         private static IEnumerable<INamedTypeSymbol> GetPublicTypes(IAssemblySymbol assembly)
         {
-            var visitor = new GetAllSymbolsVisitor();
+            var visitor = new AnalyzeSolutionSymbolVisitor(
+                SkippedNamespaces,
+                SkippedAttributes);
             visitor.Visit(assembly.GlobalNamespace);
-            return visitor.Symbols;
+            return visitor.GetResult().PotentialSymbols;
         }
 
         private void AssertArguments(AnalyzeSolutionArguments arguments)
@@ -86,58 +84,6 @@ namespace UnusedSymbolsAnalyzer.UseCases.Interactors.AnalyzeSolution
             {
                 UnusedTypes = unusedPublicTypes
             };
-        }
-
-        private class GetAllSymbolsVisitor : SymbolVisitor
-        {
-            public BlockingCollection<INamedTypeSymbol> Symbols { get; } = new BlockingCollection<INamedTypeSymbol>();
-
-            public override void VisitNamespace(INamespaceSymbol symbol)
-            {
-                if (!IsSkippedNamespace(symbol))
-                {
-                    Parallel.ForEach(symbol.GetMembers(), s => s.Accept(this));
-                }
-            }
-
-            public override void VisitNamedType(INamedTypeSymbol symbol)
-            {
-                if (IsRelevantType(symbol))
-                {
-                    this.Symbols.Add(symbol);
-                }
-            }
-
-            private static bool IsSkippedNamespace(INamespaceSymbol namespaceSymbol)
-            {
-                return SkippedNamespaces.Contains(namespaceSymbol.ToDisplayString());
-            }
-
-            private static bool IsRelevantType(INamedTypeSymbol symbol)
-            {
-                return IsPublicOrInternal(symbol)
-                    && !HasSkippedAttribute(symbol);
-            }
-
-            private static bool HasSkippedAttribute(INamedTypeSymbol symbol)
-            {
-                var attributes = symbol.GetAttributes();
-
-                return attributes.Any(
-                    attributeData =>
-                        SkippedAttributes.Contains(FullyQualifiedName(attributeData.AttributeClass)));
-            }
-
-            private static bool IsPublicOrInternal(INamedTypeSymbol symbol)
-            {
-                return symbol.DeclaredAccessibility is
-                    Accessibility.Public or Accessibility.Internal;
-            }
-
-            private static string FullyQualifiedName(ITypeSymbol typeSymbol)
-            {
-                return typeSymbol.ToDisplayString(FullyQualifiedNameFormat);
-            }
         }
     }
 }

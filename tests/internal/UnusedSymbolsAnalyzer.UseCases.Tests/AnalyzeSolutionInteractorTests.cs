@@ -79,7 +79,7 @@ using NUnit.Framework;
 namespace Dependency
 {
     [TestFixture]
-    public class UnusedClass
+    public class SomeTextFixture
     {
     }
 }";
@@ -89,6 +89,34 @@ namespace Dependency
                     .AddPackages(ImmutableArray.Create(
                         new PackageIdentity("nunit", "3.13.1"))),
                 this.CancellationToken);
+            var result = await analyzeSolutionInteractor.AnalyzeSolution(new AnalyzeSolutionArguments { Solution = solution }, this.CancellationToken);
+            Assert.That(result.UnusedTypes, Is.Null.Or.Empty);
+        }
+
+        [Test]
+        public async Task AnalyzeSolution_UsedExtensionsClassShouldNotBeReported()
+        {
+            var analyzeSolutionInteractor = new AnalyzeSolutionInteractor();
+            var dependencySource = @"
+namespace Dependency
+{
+    public static class UsedExtensionsClass
+    {
+        public static int MyPlusSevenExtension(this int startingValue)
+        {
+            return startingValue + 7;
+        }
+    }
+}";
+            var source = @"
+using Dependency;
+
+private class SomeClass
+{
+    private static int hui = 5.MyPlusSevenExtension();
+}
+";
+            var solution = await WorkspaceCreator.CreateDependingSourcesSolutionAsync(source, dependencySource, this.CancellationToken);
             var result = await analyzeSolutionInteractor.AnalyzeSolution(new AnalyzeSolutionArguments { Solution = solution }, this.CancellationToken);
             Assert.That(result.UnusedTypes, Is.Null.Or.Empty);
         }

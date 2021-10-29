@@ -120,5 +120,45 @@ private class SomeClass
             var result = await analyzeSolutionInteractor.AnalyzeSolution(new AnalyzeSolutionArguments { Solution = solution }, this.CancellationToken);
             Assert.That(result.UnusedTypes, Is.Null.Or.Empty);
         }
+
+        [Test]
+        public async Task AnalyzeSolution_PartialClass_PublicMethodOnlyUsedInSameClass_ShouldBeReported()
+        {
+            var analyzeSolutionInteractor = new AnalyzeSolutionInteractor();
+
+            var source1 = @"
+namespace Dependency
+{
+    private partial class PartialClass
+    {
+        public void OnlyInternallyUsed()
+        {
+        }
+    }
+}";
+            var source2 = @"
+namespace Dependency
+{
+    private partial class PartialClass
+    {
+        private void SomeMethod()
+        {
+            this.OnlyInternallyUsed();
+        }
+    }
+}";
+            var sourceFileList = new SourceFileList(string.Empty, "cs")
+            {
+                source1,
+                source2
+            };
+
+            var solution = await WorkspaceCreator.CreateSimpleSolutionAsync(
+                sourceFileList,
+                this.CancellationToken);
+            var result = await analyzeSolutionInteractor.AnalyzeSolution(new AnalyzeSolutionArguments { Solution = solution }, this.CancellationToken);
+            Assert.That(result.UnusedTypes, Is.Null.Or.Empty);
+            Assert.That(result.UnusedMethods, Has.Count.EqualTo(1));
+        }
     }
 }

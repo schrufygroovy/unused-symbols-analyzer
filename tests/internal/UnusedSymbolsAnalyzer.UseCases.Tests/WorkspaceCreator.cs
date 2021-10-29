@@ -60,5 +60,25 @@ namespace UnusedSymbolsAnalyzer.UseCases.Tests
 
             return test.CreateSolutionAsync(cancellationToken);
         }
+
+        public static Task<Solution> CreateSimpleSolutionAsync(
+            SourceFileList sources,
+            CancellationToken cancellationToken)
+            => CreateSimpleSolutionAsync(sources, ReferenceAssemblies.Default, cancellationToken);
+
+        public static Task<Solution> CreateSimpleSolutionAsync(
+            SourceFileList sources,
+            ReferenceAssemblies referenceAssemblies,
+            CancellationToken cancellationToken)
+        {
+            var test = new SolutionAnalyzerTest<NUnitVerifier>
+            {
+                ReferenceAssemblies = referenceAssemblies
+            };
+
+            test.TestState.Sources.AddRange(sources);
+
+            return test.CreateSolutionAsync(cancellationToken);
+        }
     }
 }

@@ -9,5 +9,10 @@ namespace UnusedSymbolsAnalyzer.UseCases.Interactors.AnalyzeSolution
         public IMethodSymbol MethodSymbol { get; init; }
 
         public IList<ReferenceLocation> ExternalReferenceLocations { get; init; }
+
+        public bool IsExternallyReferenced()
+        {
+            return this.ExternalReferenceLocations.Count > 0;
+        }
     }
 }

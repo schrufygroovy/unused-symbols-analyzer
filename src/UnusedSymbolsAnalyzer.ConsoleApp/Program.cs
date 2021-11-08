@@ -48,9 +48,15 @@ namespace UnusedSymbolsAnalyzer.ConsoleApp
                         Solution = solution
                     },
                     default(CancellationToken));
+                Console.WriteLine("----   TYPES   ----");
                 foreach (var type in result.UnusedTypes)
                 {
                     Console.WriteLine(type.ToString());
+                }
+                Console.WriteLine("----  METHODS  ----");
+                foreach (var method in result.UnusedMethods)
+                {
+                    Console.WriteLine(method.ToString());
                 }
             }
         }

@@ -68,7 +68,8 @@ namespace UnusedSymbolsAnalyzer.UseCases.Interactors.AnalyzeSolution
 
             var potentialTypes = visitorResults.SelectMany(visitorResult => visitorResult.PotentialTypes).ToList();
             var potentialMethods = visitorResults.SelectMany(visitorResult => visitorResult.PotentialMethods).ToList();
-            var methodReferenceData = (await this.GetMethodReferenceData(solution, potentialMethods, cancellationToken))
+            var methodReferenceDatas = await this.GetMethodReferenceDatas(solution, potentialMethods, cancellationToken);
+            var methodReferenceDatasLookup = methodReferenceDatas
                 .ToLookup<MethodData, INamedTypeSymbol>(
                     keySelector: methodData => methodData.MethodSymbol.ContainingType,
                     comparer: SymbolEqualityComparer.Default);
@@ -80,8 +81,8 @@ namespace UnusedSymbolsAnalyzer.UseCases.Interactors.AnalyzeSolution
                 var locations = references.SelectMany(reference => reference.Locations).ToList();
                 if (!locations.Any())
                 {
-                    var methods = methodReferenceData[type];
-                    if (methods.Any(method => method.ExternalReferenceLocations.Count > 0))
+                    var methods = methodReferenceDatasLookup[type];
+                    if (methods.Any(method => method.IsExternallyReferenced()))
                     {
                         continue;
                     }
@@ -90,13 +91,19 @@ namespace UnusedSymbolsAnalyzer.UseCases.Interactors.AnalyzeSolution
                 }
             }
 
+            var unusedMethods = methodReferenceDatas
+                .Where(methodReferenceData => !methodReferenceData.IsExternallyReferenced())
+                .Select(methodReferenceData => methodReferenceData.MethodSymbol)
+                .ToList();
+
             return new AnalyzeSolutionResult
             {
-                UnusedTypes = unusedTypes
+                UnusedTypes = unusedTypes,
+                UnusedMethods = unusedMethods
             };
         }
 
-        private async Task<List<MethodData>> GetMethodReferenceData(
+        private async Task<List<MethodData>> GetMethodReferenceDatas(
             Solution solution,
             IList<IMethodSymbol> methodSymbols,
             CancellationToken cancellationToken)

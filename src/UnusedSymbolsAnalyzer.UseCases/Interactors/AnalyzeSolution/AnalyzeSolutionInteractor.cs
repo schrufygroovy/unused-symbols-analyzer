@@ -31,13 +31,13 @@ namespace UnusedSymbolsAnalyzer.UseCases.Interactors.AnalyzeSolution
             return this.AnalyzeSolutionImpl(arguments, cancellationToken);
         }
 
-        private static IEnumerable<INamedTypeSymbol> GetPublicTypes(IAssemblySymbol assembly)
+        private static AnalyzeSolutionSymbolVisitorResult GetAnalyzeSolutionSymbolVisitorResult(IAssemblySymbol assembly)
         {
             var visitor = new AnalyzeSolutionSymbolVisitor(
                 SkippedNamespaces,
                 SkippedAttributes);
             visitor.Visit(assembly.GlobalNamespace);
-            return visitor.GetResult().PotentialSymbols;
+            return visitor.GetResult();
         }
 
         private void AssertArguments(AnalyzeSolutionArguments arguments)
@@ -58,32 +58,67 @@ namespace UnusedSymbolsAnalyzer.UseCases.Interactors.AnalyzeSolution
             CancellationToken cancellationToken)
         {
             var solution = arguments.Solution;
-            var allPublicTypes = new List<INamedTypeSymbol>();
 
             var compilationTasks = solution.Projects.Select(project => project.GetCompilationAsync(cancellationToken));
 
             var compilations = await Task.WhenAll(compilationTasks);
 
-            foreach (var compilation in compilations)
-            {
-                allPublicTypes.AddRange(GetPublicTypes(compilation.Assembly));
-            }
+            var visitorResults = compilations.Select(compilation => GetAnalyzeSolutionSymbolVisitorResult(compilation.Assembly));
 
-            var unusedPublicTypes = new List<INamedTypeSymbol>();
-            foreach (var type in allPublicTypes)
+            var potentialTypes = visitorResults.SelectMany(visitorResult => visitorResult.PotentialTypes).ToList();
+            var potentialMethods = visitorResults.SelectMany(visitorResult => visitorResult.PotentialMethods).ToList();
+            var methodReferenceData = (await this.GetMethodReferenceData(solution, potentialMethods, cancellationToken))
+                .ToLookup<MethodData, INamedTypeSymbol>(
+                    keySelector: methodData => methodData.MethodSymbol.ContainingType,
+                    comparer: SymbolEqualityComparer.Default);
+
+            var unusedTypes = new List<INamedTypeSymbol>();
+            foreach (var type in potentialTypes)
             {
                 var references = await SymbolFinder.FindReferencesAsync(type, solution, cancellationToken);
                 var locations = references.SelectMany(reference => reference.Locations).ToList();
                 if (!locations.Any())
                 {
-                    unusedPublicTypes.Add(type);
+                    var methods = methodReferenceData[type];
+                    if (methods.Any(method => method.ExternalReferenceLocations.Count > 0))
+                    {
+                        continue;
+                    }
+
+                    unusedTypes.Add(type);
                 }
             }
 
             return new AnalyzeSolutionResult
             {
-                UnusedTypes = unusedPublicTypes
+                UnusedTypes = unusedTypes
             };
+        }
+
+        private async Task<List<MethodData>> GetMethodReferenceData(
+            Solution solution,
+            IList<IMethodSymbol> methodSymbols,
+            CancellationToken cancellationToken)
+        {
+            var methodReferenceData = new List<MethodData>();
+
+            foreach (var methodSymbol in methodSymbols)
+            {
+                var documentsOfTheType = methodSymbol.ContainingType.Locations.Select(document => document.SourceTree?.FilePath);
+                var references = await SymbolFinder.FindReferencesAsync(methodSymbol, solution, cancellationToken);
+                var locations = references.SelectMany(reference => reference.Locations).ToList();
+                var externalLocations = locations
+                    .Where(referenceLocation => !documentsOfTheType.Contains(referenceLocation.Document.FilePath))
+                    .ToList();
+                methodReferenceData.Add(
+                    new MethodData
+                    {
+                        MethodSymbol = methodSymbol,
+                        ExternalReferenceLocations = externalLocations
+                    });
+            }
+
+            return methodReferenceData;
         }
     }
 }

@@ -30,8 +30,8 @@ namespace UnusedSymbolsAnalyzer.UseCases.Interactors.AnalyzeSolution
         {
             return new AnalyzeSolutionSymbolVisitorResult
             {
-                PotentialSymbols = this.PotentialSymbols.ToList(),
-                PotentialMethods = this.PotentialMethods.ToList()
+                PotentialTypes = this.PotentialSymbols.ToList(),
+                PotentialMethods = this.PotentialMethods.ToList(),
             };
         }
 

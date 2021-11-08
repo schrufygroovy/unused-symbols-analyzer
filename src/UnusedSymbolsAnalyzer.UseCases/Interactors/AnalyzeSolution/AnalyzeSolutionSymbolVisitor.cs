@@ -9,6 +9,16 @@ namespace UnusedSymbolsAnalyzer.UseCases.Interactors.AnalyzeSolution
 {
     internal class AnalyzeSolutionSymbolVisitor : SymbolVisitor
     {
+        private static readonly HashSet<string> MethodNamesWhereFindingReferencesTakesVeryLong = new HashSet<string>()
+            {
+                "<Clone>$",
+                "Clone",
+                "Dispose",
+                "Equals",
+                "GetHashCode",
+                "ToString",
+            };
+
         public AnalyzeSolutionSymbolVisitor(
             HashSet<string> skippedNamespaces,
             HashSet<string> skippedAttributes)
@@ -70,10 +80,7 @@ namespace UnusedSymbolsAnalyzer.UseCases.Interactors.AnalyzeSolution
         {
             var methodSymbolName = methodSymbol.Name;
 
-            return methodSymbolName.Equals("ToString")
-                || methodSymbolName.Equals("Dispose")
-                || methodSymbolName.Equals("GetHashCode")
-                || methodSymbolName.Equals("Equals");
+            return MethodNamesWhereFindingReferencesTakesVeryLong.Contains(methodSymbolName);
         }
 
         private static bool IsDefaultConstructor(IMethodSymbol methodSymbol)
@@ -86,7 +93,8 @@ namespace UnusedSymbolsAnalyzer.UseCases.Interactors.AnalyzeSolution
         {
             return IsPublicOrInternal(methodSymbol)
                 && !IsAMethodWhereFindingReferencesTakesVeryLong(methodSymbol)
-                && !IsDefaultConstructor(methodSymbol);
+                && !IsDefaultConstructor(methodSymbol)
+                && !this.HasSkippedAttribute(methodSymbol);
         }
 
         private bool IsSkippedNamespace(INamespaceSymbol namespaceSymbol)
@@ -100,7 +108,7 @@ namespace UnusedSymbolsAnalyzer.UseCases.Interactors.AnalyzeSolution
                 && !this.HasSkippedAttribute(symbol);
         }
 
-        private bool HasSkippedAttribute(INamedTypeSymbol symbol)
+        private bool HasSkippedAttribute(ISymbol symbol)
         {
             var attributes = symbol.GetAttributes();
 

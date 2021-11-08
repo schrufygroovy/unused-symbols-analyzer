@@ -99,6 +99,35 @@ namespace Dependency
             AssertUnusedMethods(result, new[] { "Dependency.ClassWithOverride.VisitNamespace(INamespaceSymbol)" });
         }
 
+        [Test]
+        public async Task AnalyzeSolution_PublicTestFunctionShouldNotBeReported()
+        {
+            var analyzeSolutionInteractor = new AnalyzeSolutionInteractor();
+
+            var source = @"
+using NUnit.Framework;
+
+namespace Dependency
+{
+    public class SomeTextFixture
+    {
+        [Test]
+        public void PublicTest()
+        {
+        }
+    }
+}";
+            var solution = await WorkspaceCreator.CreateOneFileSolutionAsync(
+                source,
+                ReferenceAssemblies.Default
+                    .AddPackages(ImmutableArray.Create(
+                        new PackageIdentity("nunit", "3.13.1"))),
+                this.CancellationToken);
+            var result = await analyzeSolutionInteractor.AnalyzeSolution(new AnalyzeSolutionArguments { Solution = solution }, this.CancellationToken);
+            Assert.That(result.UnusedTypes, Has.Count.EqualTo(1));
+            Assert.That(result.UnusedMethods, Is.Null.Or.Empty);
+        }
+
         private static void AssertUnusedMethods(
             AnalyzeSolutionResult result,
             string[] expectedMethods)

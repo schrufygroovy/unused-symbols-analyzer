@@ -45,7 +45,8 @@ namespace UnusedSymbolsAnalyzer.ConsoleApp
                 var result = await new AnalyzeSolutionInteractor().AnalyzeSolution(
                     new AnalyzeSolutionArguments
                     {
-                        Solution = solution
+                        Solution = solution,
+                        IgnoreOverriddenMethods = true
                     },
                     default(CancellationToken));
                 Console.WriteLine("----   TYPES   ----");

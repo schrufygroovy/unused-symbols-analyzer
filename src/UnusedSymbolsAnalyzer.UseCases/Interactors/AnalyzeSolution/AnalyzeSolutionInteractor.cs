@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -105,7 +106,12 @@ namespace UnusedSymbolsAnalyzer.UseCases.Interactors.AnalyzeSolution
             foreach (var methodSymbol in methodSymbols)
             {
                 var documentsOfTheType = methodSymbol.ContainingType.Locations.Select(document => document.SourceTree?.FilePath);
+                Console.WriteLine($"Grabbing references from: {methodSymbol}.");
+                var stopWatch = new Stopwatch();
+                stopWatch.Start();
                 var references = await SymbolFinder.FindReferencesAsync(methodSymbol, solution, cancellationToken);
+                stopWatch.Stop();
+                Console.WriteLine($"Grabbing references from: {methodSymbol} took: {stopWatch.ElapsedMilliseconds}.");
                 var locations = references.SelectMany(reference => reference.Locations).ToList();
                 var externalLocations = locations
                     .Where(referenceLocation => !documentsOfTheType.Contains(referenceLocation.Document.FilePath))

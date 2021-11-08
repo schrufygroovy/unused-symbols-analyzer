@@ -66,9 +66,19 @@ namespace UnusedSymbolsAnalyzer.UseCases.Interactors.AnalyzeSolution
                 Accessibility.Public or Accessibility.Internal;
         }
 
+        private static bool IsAMethodWhereFindingReferencesTakesVeryLong(IMethodSymbol methodSymbol)
+        {
+            var methodSymbolName = methodSymbol.Name;
+
+            return methodSymbolName.Equals("ToString")
+                || methodSymbolName.Equals("Dispose")
+                || methodSymbolName.Equals("GetHashCode")
+                || methodSymbolName.Equals("Equals");
+        }
+
         private bool IsRelevantMethod(IMethodSymbol methodSymbol)
         {
-            return IsPublicOrInternal(methodSymbol);
+            return IsPublicOrInternal(methodSymbol) && !IsAMethodWhereFindingReferencesTakesVeryLong(methodSymbol);
         }
 
         private bool IsSkippedNamespace(INamespaceSymbol namespaceSymbol)

@@ -93,7 +93,7 @@ namespace Dependency
 
             var solution = await this.PrepareSolutionWithOverrideMethod();
 
-            var result = await analyzeSolutionInteractor.AnalyzeSolution(new AnalyzeSolutionArguments { Solution = solution, IgnoreOverriddenMethods = true }, this.CancellationToken);
+            var result = await analyzeSolutionInteractor.AnalyzeSolution(new AnalyzeSolutionArguments { Solution = solution, IgnoreOverriddenMethods = false }, this.CancellationToken);
 
             Assert.That(result.UnusedTypes, Has.Count.EqualTo(1));
             AssertUnusedMethods(result, new[] { "Dependency.ClassWithOverride.VisitNamespace(INamespaceSymbol)" });

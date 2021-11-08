@@ -96,6 +96,11 @@ namespace UnusedSymbolsAnalyzer.UseCases.Interactors.AnalyzeSolution
                 .Select(methodReferenceData => methodReferenceData.MethodSymbol)
                 .ToList();
 
+            if (arguments.IgnoreOverriddenMethods)
+            {
+                unusedMethods = unusedMethods.Where(methodReferenceData => !methodReferenceData.IsOverride).ToList();
+            }
+
             return new AnalyzeSolutionResult
             {
                 UnusedTypes = unusedTypes,

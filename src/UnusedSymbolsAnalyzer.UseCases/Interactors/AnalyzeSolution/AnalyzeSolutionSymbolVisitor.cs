@@ -76,9 +76,17 @@ namespace UnusedSymbolsAnalyzer.UseCases.Interactors.AnalyzeSolution
                 || methodSymbolName.Equals("Equals");
         }
 
+        private static bool IsDefaultConstructor(IMethodSymbol methodSymbol)
+        {
+            return methodSymbol.MethodKind == MethodKind.Constructor
+                && methodSymbol.Parameters.Length == 0;
+        }
+
         private bool IsRelevantMethod(IMethodSymbol methodSymbol)
         {
-            return IsPublicOrInternal(methodSymbol) && !IsAMethodWhereFindingReferencesTakesVeryLong(methodSymbol);
+            return IsPublicOrInternal(methodSymbol)
+                && !IsAMethodWhereFindingReferencesTakesVeryLong(methodSymbol)
+                && !IsDefaultConstructor(methodSymbol);
         }
 
         private bool IsSkippedNamespace(INamespaceSymbol namespaceSymbol)

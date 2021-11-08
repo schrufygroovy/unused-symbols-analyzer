@@ -20,9 +20,6 @@
         },
         "layoutRules": {
             "newlineAtEndOfFile": "require"
-        },
-        "documentationRules": {
-            "companyName": "wikifolio Financial Technologies AG"
         }
     }
 }
